@@ -1,0 +1,39 @@
+# Pins for a Calbredge install on an RK3588 board (Orange Pi 5 Plus, vendor Ubuntu Jammy,
+# Python 3.10), from the validated environment on that board (2026-10).
+#
+# Use with an isolated venv, never --system-site-packages: a board with pip --user packages
+# would load those ahead of the venv's. Everything here installs from wheels, so the board's
+# stock pip is enough and nothing is compiled:
+#
+#   python3 -m venv ~/calbredge-venv
+#   ~/calbredge-venv/bin/pip install -c constraints/rk3588-jammy-py310.txt \
+#       --find-links <kit> "calbredge[rk3588]==<version>"
+#
+# calbredge and calbredge-protocol aren't pinned here: they come from the release kit, and
+# calbredge pins its own protocol exactly.
+#
+# rknn-toolkit-lite2 is the Python binding only. The runtime library it loads,
+# librknnrt.so, is not a pip package: `calbredge doctor` checks that it is installed and
+# matches this binding's version.
+#
+# Every line is a package the kit's install resolves: calbredge's own requirements,
+# rknn-toolkit-lite2's (numpy, psutil, ruamel.yaml) and theirs.
+annotated-types==0.8.0
+certifi==2026.10.23
+charset-normalizer==3.5.2
+click==8.5.0
+idna==3.20
+ml_dtypes==0.6.0
+numpy==2.2.6
+onnx==1.23.1
+protobuf==7.36.2
+psutil==7.2.2
+pydantic==2.13.5
+pydantic_core==2.46.5
+PyYAML==6.0.3
+requests==2.34.2
+rknn-toolkit-lite2==2.3.2
+ruamel.yaml==0.19.1
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.8.0

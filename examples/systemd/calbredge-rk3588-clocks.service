@@ -1,0 +1,32 @@
+# Pin the RK3588's CPU, NPU and memory clocks at every boot, so a run never meets the
+# on-demand governors the board boots with. To install it, as an administrator, from a
+# checkout of Calbredge:
+#
+#   sudo install -m 755 scripts/performance_mode.sh /usr/local/sbin/calbredge-performance-mode
+#   sudo cp examples/systemd/calbredge-rk3588-clocks.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now calbredge-rk3588-clocks.service
+#
+# It runs after cpufrequtils.service, which sets the CPU governors from
+# /etc/default/cpufrequtils at boot and would otherwise undo it. A later restart of
+# cpufrequtils.service (a package upgrade can do one) resets the governors again, and
+# `systemctl start` does nothing once this unit has run (it stays active), so re-pin with a
+# restart:
+#
+#   sudo systemctl restart calbredge-rk3588-clocks.service
+#
+# The GPU governor is left alone: the GPU is idle while the NPU runs a model.
+#
+# Check with: calbredge doctor
+
+[Unit]
+Description=Pin RK3588 CPU, NPU and memory clocks for Calbredge measurement
+After=cpufrequtils.service loadcpufreq.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/calbredge-performance-mode
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

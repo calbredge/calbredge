@@ -1,0 +1,12 @@
+{
+  "pyright": "1.1.414",
+  "errors": {
+    "agent/calbredge/cli.py": 7,
+    "agent/calbredge/collector.py": 1,
+    "agent/calbredge/validate_rknn.py": 2,
+    "protocol/calbredge_protocol/onnx_adapter.py": 3,
+    "protocol/calbredge_protocol/power_meter.py": 2,
+    "protocol/calbredge_protocol/rknn_adapter.py": 4,
+    "protocol/calbredge_protocol/tensorrt_adapter.py": 15
+  }
+}

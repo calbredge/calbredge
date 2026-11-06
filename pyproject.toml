@@ -1,0 +1,96 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+# Fenced Python blocks in Markdown are documentation, not source.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "SIM", "UP", "C4", "RUF", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S", "B"]
+# tier 1: needs a measured A/B before a code change
+"agent/calbredge/cli.py" = ["B904", "E501", "I001"]
+# tier 1: needs a measured A/B before a code change
+"protocol/calbredge_protocol/onnx_adapter.py" = ["B905", "RUF001"]
+# tier 1: needs a measured A/B before a code change
+"protocol/calbredge_protocol/rknn_adapter.py" = ["SIM105"]
+# tier 1: needs a measured A/B before a code change
+"protocol/calbredge_protocol/tensorrt_adapter.py" = ["B007", "RUF001", "RUF002"]
+# tier 1: needs a measured A/B before a code change
+"protocol/calbredge_protocol/throughput.py" = ["RUF002"]
+
+[tool.pyright]
+# pyright checks the files listed here, not the whole tree.
+include = [
+    "protocol/calbredge_protocol/iterative_policy.py",
+    "protocol/calbredge_protocol/power_window.py",
+    "tests/open/test_iterative_policy.py",
+    "protocol/calbredge_protocol/canonical.py",
+    "protocol/calbredge_protocol/result_v2.py",
+    "protocol/calbredge_protocol/derive_v2.py",
+    "tests/open/test_canonical.py",
+    "tests/open/test_result_v2.py",
+    "tests/open/test_v2_derivations.py",
+    "tests/open/test_schema_doc_conformance.py",
+    "agent/calbredge/onnx_contract.py",
+    "agent/calbredge/clock_state.py",
+    "agent/calbredge/host_v2.py",
+    "agent/calbredge/inspect_v2.py",
+    "tests/open/fake_hosts.py",
+    "tests/open/test_onnx_contract.py",
+    "tests/open/test_clock_state.py",
+    "tests/open/test_host_v2.py",
+    "tests/open/test_inspect.py",
+    "agent/calbredge/result_builder.py",
+    "agent/calbredge/bundle.py",
+    "tests/open/test_run_bundle.py",
+    "tests/open/v1_golden.py",
+    "protocol/calbredge_protocol/engine_cache.py",
+    "tests/open/test_engine_cache.py",
+    "protocol/calbredge_protocol/support_matrix.py",
+    "tests/open/bundles.py",
+    "tests/open/test_home_isolation.py",
+    "tests/open/test_packaging.py",
+    "tests/open/test_open_gate_boundary.py",
+    "tests/open/test_support_tiers.py",
+    "agent/calbredge/doctor.py",
+    "tests/open/test_doctor.py",
+    "agent/calbredge/example_model.py",
+    "tests/open/test_quickstart.py",
+    "agent/calbredge/project.py",
+    "agent/calbredge/term.py",
+    "tests/open/test_project.py",
+    "tests/open/test_term.py",
+    "agent/calbredge/init.py",
+    "tests/open/test_init.py",
+    "tests/open/test_run_header.py",
+    "agent/calbredge/extension.py",
+    "tests/open/test_extension.py",
+    "tests/open/test_missing_gate.py",
+    "tests/open/test_init_hook.py",
+    "tests/open/test_validate_rknn_scoring.py",
+]
+typeCheckingMode = "basic"
+# The oldest Python the packages support, so pyright flags syntax and standard library use
+# that would break on it.
+pythonVersion = "3.10"
+# torch is not a declared dependency of either package and is not installed for the tests;
+# a missing import is a warning, so a real type error still fails the check.
+reportMissingImports = "warning"
+# The packages are installed editable through an import hook pyright cannot follow; point it
+# at the sources so their types are checked.
+extraPaths = ["agent", "protocol"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/open"]
+markers = [
+    "unit: fast, in-process tests with no hardware or network dependencies",
+    "integration: tests requiring real runtime libraries or edge hardware (excluded from default CI)",
+]
+filterwarnings = ["ignore:.*CUDAExecutionProvider.*:UserWarning"]
+
+[tool.coverage.run]
+# What `pytest --cov` measures. scripts/ and tests/ are not measured.
+branch = true
+source = ["agent", "protocol"]

@@ -1,0 +1,33 @@
+# Development-only tooling for running the test suite and the linters.
+#
+# Runtime dependencies belong in protocol/pyproject.toml and agent/pyproject.toml: install
+# those packages (agent with its `onnxruntime` and `rknn-convert` extras) before this file.
+# This file holds only what the tests and linters need that neither package declares.
+#
+# pytest       - test runner (pyproject.toml's [tool.pytest.ini_options] sets the test path,
+#                markers and warning filters).
+# onnx         - tests/open/conftest.py synthesizes stand-in fixtures with it when the real
+#                ones are not present. Also a runtime dependency of agent.
+pytest>=8.0
+onnx>=1.16
+
+# ruff         - linter and formatter. Pinned exactly: ruff changes rule behaviour between
+#                releases, so an unpinned version would make lint results differ across
+#                machines.
+ruff==0.16.1
+
+# pyright      - static type checker, scoped to the files pyproject.toml's [tool.pyright]
+#                lists. Pinned exactly, for the same reason as ruff.
+pyright==1.1.414
+
+# setuptools   - tests/open/test_packaging.py builds the wheels in-process to check that a
+#                stale build directory can't get into them and that each carries its
+#                licence. 77+ for PEP 639 licence metadata. Python 3.12 venvs don't include
+#                setuptools. Pinned exactly, for the same reason as ruff.
+setuptools==84.1.0
+
+# pytest-cov   - measures coverage (pytest --cov; pyproject.toml's [tool.coverage.run] sets
+# coverage       branch coverage and the measured source). Both pinned exactly, so coverage
+#                numbers are reproducible.
+pytest-cov==7.1.0
+coverage==7.16.2

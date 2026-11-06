@@ -1,0 +1,52 @@
+[build-system]
+# PEP 639 licence metadata needs setuptools 77 or later.
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calbredge"
+version = "0.3.0"
+description = "Edge AI inference benchmarking agent"
+requires-python = ">=3.10"
+# LICENSE is the Apache License 2.0 text, unmodified; NOTICE is the attribution
+# notice its section 4(d) asks for. PyPI refuses any upload carrying a
+# "Private ::" classifier.
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "click",
+    "requests",
+    "pydantic>=2.0",
+    "psutil",
+    "pyyaml",
+    # Exact: agent and protocol are released together and their internal API
+    # is not stable across versions. tests/open/test_packaging.py keeps this equal
+    # to protocol's own version.
+    "calbredge-protocol==0.3.0",
+    # v2 result fields are derived from the source .onnx graph
+    # (calbredge/onnx_contract.py). Needs no numpy 2 (Jetson: numpy<2).
+    "onnx>=1.16",
+]
+
+[project.optional-dependencies]
+onnxruntime = ["onnxruntime"]
+rknn-convert = ["Pillow"]
+# TensorRT on Jetson: TensorRT itself comes from JetPack (system site-packages),
+# not pip. pycuda builds from source on aarch64 (needs nvcc on PATH); install
+# with -c constraints/jetson-jp6.2-py310.txt.
+jetson = ["pycuda"]
+# RKNN on an RK3588: the Python binding only. librknnrt.so, the library it loads, is not a pip
+# package (`calbredge doctor` checks it). Install with -c constraints/rk3588-jammy-py310.txt.
+rk3588 = ["rknn-toolkit-lite2"]
+
+[project.scripts]
+calbredge = "calbredge.cli:main"
+calb = "calbredge.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+# Only the calbredge package. Unrestricted discovery also packaged a stale
+# build/lib/calbredge/ left by an earlier build;
+# tests/open/test_packaging.py builds a wheel with one present to keep it out.
+include = ["calbredge", "calbredge.*"]

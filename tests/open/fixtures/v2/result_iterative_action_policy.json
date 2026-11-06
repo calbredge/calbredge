@@ -1,0 +1,147 @@
+{
+  "schema_version": "2.0",
+  "result_id": "9d2c4b7a-1e3f-4a5b-8c6d-7e8f9a0b1c2d",
+  "timestamp": "2026-09-24T12:00:00Z",
+  "workload": {
+    "workload_type": "iterative_action_policy",
+    "work_unit": "decision",
+    "workload_params": {
+      "scheduler": "ddim",
+      "denoising_steps": 16,
+      "action_horizon": 8,
+      "control_rate_hz": 10,
+      "replan_budget": 1,
+      "fidelity_metric": "executed_action_divergence_p95"
+    }
+  },
+  "candidate": {
+    "model_hash": "2c68f21a6e2c7fab9ec496809b43ef8b613e586b0ebb0b90e69aba3748f51812",
+    "model_label": "diffusion_policy_pusht",
+    "engine_hash": "9790fa4d974aacedbf700142615cd55611b94da398de3e8f58b475aed56d2d5d",
+    "git_commit": "0123456789abcdef0123456789abcdef01234567",
+    "git_dirty": false,
+    "runtime": "tensorrt-fp16",
+    "runtime_family": "tensorrt",
+    "runtime_version": "10.3.0",
+    "driver_version": {
+      "l4t": "36.4.3",
+      "cuda": "12.6"
+    },
+    "precision": "fp16"
+  },
+  "target": {
+    "hardware_id": "3d9a06fce26f2af98419957c1becb738b8c4d321897c03836cac4df0928dc491",
+    "hardware_family": "nvidia_jetson_orin_nano_engineering_reference_developer_kit_super",
+    "hardware_family_source": "device_tree",
+    "power_mode": "maxn_super",
+    "power_domain": "module_rail",
+    "power_source": "tegrastats",
+    "telemetry_measurement_boundary": "windowed_bracket",
+    "clock_state": {
+      "captured": true,
+      "source": "jetson"
+    },
+    "clocks_pinned": true,
+    "cpu_affinity": {
+      "requested": "big",
+      "applied": null,
+      "reason": "homogeneous CPU"
+    },
+    "cpu_affinity_tier": "homogeneous",
+    "system_metadata": {
+      "hostname": "jetson-orin-nano-super",
+      "os_name": "Linux",
+      "os_version": "Ubuntu 22.04.5 LTS",
+      "cpu_model": "ARMv8 Processor rev 1 (v8l)",
+      "cpu_cores": 6,
+      "ram_gb": 7.4,
+      "gpu_model": null,
+      "python_version": "3.10.12",
+      "runtime_name": "tensorrt",
+      "runtime_version": "10.3.0",
+      "device_tree_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super"
+    }
+  },
+  "protocol": {
+    "protocol_version": "1.0",
+    "warmup_iterations": 50,
+    "measurement_iterations": 200,
+    "batch_size": 1,
+    "input_shape": [
+      1,
+      2,
+      20
+    ],
+    "io_signature": {
+      "inputs": [
+        {
+          "name": "obs",
+          "dtype": "float32",
+          "shape": [
+            1,
+            2,
+            20
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "action",
+          "dtype": "float32",
+          "shape": [
+            1,
+            8,
+            2
+          ]
+        }
+      ]
+    },
+    "preprocessing": "none",
+    "input_fixture_digest": null,
+    "graph_kind": "fixed_compute"
+  },
+  "capabilities": {
+    "artifact_format": "onnx",
+    "telemetry": [
+      "power",
+      "thermal"
+    ]
+  },
+  "metrics": {
+    "latency_p50_ms": 137.1,
+    "latency_p90_ms": 139.0,
+    "latency_p99_ms": 141.2,
+    "latency_mean_ms": 137.4,
+    "latency_std_ms": 0.9,
+    "sample_count": 200,
+    "throughput_ips": 7.3,
+    "watts_average": 7.5046,
+    "watts_peak": 8.1,
+    "energy_joules_window": 2.3,
+    "joules_per_inference": 1.03,
+    "temperature_start_celsius": 44.1,
+    "temperature_end_celsius": 46.3,
+    "temperature_peak_celsius": 46.5,
+    "thermal_throttle_detected": false,
+    "gpu_memory_used_mb": null,
+    "gpu_memory_total_mb": null,
+    "system_memory_used_mb": 2710.0,
+    "run_status": "stable",
+    "run_status_reason": null,
+    "samples_pointer": "samples.jsonl"
+  },
+  "workload_metrics": {
+    "N_denoise": 16,
+    "unet_calls_per_decision": 16,
+    "T_decision_ms": {
+      "p50": 137.1,
+      "p99": 141.2,
+      "n": 200
+    },
+    "stale_actions_p50": 2,
+    "stale_actions_p99": 2
+  },
+  "quality": {
+    "quality_status": "OUTPUT_FIDELITY_ONLY"
+  }
+}

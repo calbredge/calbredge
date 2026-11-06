@@ -1,0 +1,33 @@
+# Model artifacts
+*.onnx
+*.engine
+*.xmodel
+*.tflite
+*.rknn
+
+# Python artifacts
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment and secrets
+.env
+.env.*
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Test and coverage output
+.pytest_cache/
+htmlcov/
+.coverage
+
+# The ONNX contract cache sidecars (agent/calbredge/onnx_contract.py)
+*.calbredge-contract.json

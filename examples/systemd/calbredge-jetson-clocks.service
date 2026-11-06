@@ -1,0 +1,29 @@
+# Pin the Jetson's clocks at every boot, so a self-hosted runner that has no
+# sudo never meets unpinned clocks (docs/CI_JETSON.md). The kit's
+# `sudo ./install.sh --pin-clocks-at-boot` installs it; to install it by hand,
+# as an administrator:
+#
+#   sudo cp calbredge-jetson-clocks.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now calbredge-jetson-clocks.service
+#
+# jetson_clocks pins the clocks for the power mode in force, so this runs after
+# nvpmodel has applied it. Changing the power mode (sudo nvpmodel -m <mode>) unpins
+# them, and `systemctl start` does nothing once this unit has run (it stays
+# active), so re-pin with a restart:
+#
+#   sudo systemctl restart calbredge-jetson-clocks.service
+#
+# Check with: calbredge doctor
+
+[Unit]
+Description=Pin Jetson clocks for Calbredge measurement (jetson_clocks)
+After=nvpmodel.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/jetson_clocks
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

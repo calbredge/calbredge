@@ -1,0 +1,5 @@
+click
+requests
+pydantic
+tf2onnx
+onnx

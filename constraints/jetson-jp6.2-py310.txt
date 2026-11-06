@@ -1,0 +1,58 @@
+# Pins for a Calbredge install on Jetson (JetPack 6.2, Python 3.10), from the
+# validated CNN environment on the Orin Nano Super (calbredge-182-venv, 2026-09).
+#
+# Use with a venv created with --system-site-packages (TensorRT comes from
+# JetPack, not pip) and nvcc on PATH (pycuda builds from source on aarch64):
+#
+#   python3 -m venv --system-site-packages ~/calbredge-venv
+#   PATH=/usr/local/cuda/bin:$PATH ~/calbredge-venv/bin/pip install \
+#       -c constraints/jetson-jp6.2-py310.txt --find-links <kit> "calbredge[jetson]==<version>"
+#
+# calbredge and calbredge-protocol aren't pinned here: they come from the release kit, and
+# calbredge pins its own protocol exactly.
+#
+# A constraint only applies to a package pip is installing; lines for packages
+# nothing requires (test tools, the JetPack TensorRT wheels) are inert.
+# numpy stays 1.x: JetPack's TensorRT and onnxruntime-gpu builds need it.
+annotated-types==0.7.0
+certifi==2026.10.23
+charset-normalizer==3.4.7
+click==8.3.3
+coloredlogs==15.0.1
+exceptiongroup==1.3.1
+flatbuffers==25.12.19
+humanfriendly==10.0
+idna==3.15
+iniconfig==2.3.0
+Mako==1.3.12
+MarkupSafe==3.0.3
+# ml_dtypes is required by onnx>=1.18; 0.5.4 is the only release that satisfies
+# both onnx 1.23.0 (>=0.5.4) and numpy 1.x (0.6.0 needs numpy 2). Derived, not
+# read from the device's constraints file.
+ml_dtypes==0.5.4
+mpmath==1.3.0
+numpy==1.26.4
+# onnx: installed at 1.23.0 in the validated venv (pip freeze) but missing from
+# the device's constraints file; pinned here so it can't drift.
+onnx==1.23.0
+packaging==26.2
+platformdirs==4.9.6
+pluggy==1.6.0
+protobuf==7.34.1
+psutil==7.2.2
+pycuda==2026.1
+pydantic==2.13.3
+pydantic_core==2.46.3
+Pygments==2.20.0
+pytools==2026.1
+PyYAML==6.0.3
+requests==2.33.1
+siphash24==1.8
+sympy==1.14.0
+tensorrt==10.3.0
+tensorrt_dispatch==10.3.0
+tensorrt_lean==10.3.0
+tomli==2.4.1
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+urllib3==2.8.0

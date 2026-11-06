@@ -1,0 +1,10 @@
+# Advisories the RK3588 pip-audit job ignores, for constraints/rk3588-jammy-py310.txt.
+#
+# One per line: the advisory ID (or any of its aliases), then "# review YYYY-MM-DD:" and the
+# reason it doesn't apply or can't be fixed yet:
+#
+#   PYSEC-0000-000  # review 2027-01-15: <reason>
+#
+# scripts/check_pip_audit.py fails the job when a review date has passed or is more than 180
+# days away.
+# Empty: constraints/rk3588-jammy-py310.txt has no known advisories.

@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to a pull request cancels its older, still-running checks; runs on main are
+# never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  tests:
+    name: Tests (Python ${{ matrix.python-version }})
+    # tests/open/conftest.py fails the run, never skips, when fewer tests are collected than
+    # CALBREDGE_OPEN_TESTS_MIN, so a test cannot drop out unnoticed.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    env:
+      CALBREDGE_OPEN_ONLY: "1"
+      CALBREDGE_OPEN_TESTS_MIN: "1056"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create this job's virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: Install the packages (editable) and the test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./protocol
+          pip install -e "./agent[onnxruntime,rknn-convert]"
+          pip install -r dev-requirements.txt
+
+      # pyproject.toml sets the test path and what coverage measures; the run fails below 89%
+      # of statements and branches together.
+      - name: Run the tests (with coverage)
+        run: pytest -q --cov --cov-report=term --cov-fail-under=89
+
+  lint:
+    name: Lint and formatting (ruff)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Create this job's virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      # The ruff that dev-requirements.txt pins, with pyproject.toml's settings.
+      - name: Install ruff
+        run: |
+          python -m pip install --upgrade pip
+          pip install "$(grep -E '^ruff==' dev-requirements.txt)"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Check formatting
+        run: ruff format --check .
+
+  pyright:
+    name: Pyright errors do not rise
+    # pyright-counts.json records how many pyright errors each file has. Fails when a file has
+    # more than recorded, when a file with errors is not recorded, and when a fall is not
+    # recorded (scripts/check_pyright_ratchet.py --update records it).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.10"
+
+      - name: Create this job's virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: Install the packages (editable) and the test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./protocol
+          pip install -e "./agent[onnxruntime,rknn-convert]"
+          pip install -r dev-requirements.txt
+
+      - name: Run pyright
+        run: |
+          # pyright exits 1 on any error; the check below decides from the report, and exits 2
+          # if pyright wrote none.
+          rm -rf "$RUNNER_TEMP/pyright"
+          mkdir -p "$RUNNER_TEMP/pyright"
+          pyright --outputjson agent protocol scripts > "$RUNNER_TEMP/pyright/pyright-report.json" || true
+
+      - name: Check the counts against pyright-counts.json
+        run: python scripts/check_pyright_ratchet.py --counts pyright-counts.json --report "$RUNNER_TEMP/pyright/pyright-report.json" --summary "$GITHUB_STEP_SUMMARY"
+
+  wheel-smoke:
+    name: Wheel smoke test (non-editable install)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Create this job's virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build
+
+      - name: Build wheels
+        run: |
+          python -m build --wheel --outdir "$RUNNER_TEMP/dist/protocol" ./protocol
+          python -m build --wheel --outdir "$RUNNER_TEMP/dist/agent" ./agent
+
+      - name: Install the wheels (non-editable)
+        run: |
+          pip install "$RUNNER_TEMP"/dist/protocol/*.whl
+          pip install "$(ls "$RUNNER_TEMP"/dist/agent/*.whl)[onnxruntime,rknn-convert]"
+
+      - name: Assert wheels contain their modules (guards empty-wheel packaging bugs)
+        run: |
+          python -c "from calbredge_protocol import BenchmarkResult; print('calbredge_protocol modules present')"
+          python -c "import calbredge, calbredge.cli; print('calbredge modules present')"
+          python -c "import importlib.resources as r, calbredge_protocol; assert (r.files('calbredge_protocol')/'protocols'/'v1.0.yaml').is_file(); print('v1.0.yaml packaged')"
+
+      - name: Assert --version reports the installed distribution's version
+        run: |
+          expected="calbredge, version $(python -c 'import importlib.metadata as m; print(m.version("calbredge"))')"
+          actual="$(calbredge --version)"
+          echo "$actual"
+          test "$actual" = "$expected" || { echo "FAIL: '$actual' != '$expected'"; exit 1; }
+
+      - name: Prove the packaged default protocol resolves
+        run: |
+          # calbredge run is expected to exit non-zero here (the model path does not exist);
+          # || true keeps bash -e from ending the step on it. This step only confirms the
+          # protocol banner prints, so the packaged v1.0.yaml loaded at runtime.
+          mkdir -p "$RUNNER_TEMP/home"
+          HOME="$RUNNER_TEMP/home" calbredge run --dry-run --model "$RUNNER_TEMP/nonexistent.onnx" --runtime onnxruntime > "$RUNNER_TEMP/smoke.out" 2>&1 || true
+          echo "--- smoke output ---"; cat "$RUNNER_TEMP/smoke.out"
+          grep -qF "Protocol: v1.0.yaml, input [1, 3, 224, 224]" "$RUNNER_TEMP/smoke.out" || { echo "FAIL: default protocol did not resolve from wheel install"; exit 1; }
+
+  secrets:
+    name: No secrets in the full history (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks (pinned version, sha256 verified)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/gitleaks.tar.gz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+
+      - name: Scan every commit
+        run: '"$RUNNER_TEMP/gitleaks" git . --log-opts="--all" --redact --no-banner --exit-code 1'
