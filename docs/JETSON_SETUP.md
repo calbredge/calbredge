@@ -30,6 +30,7 @@ source, so `nvcc` must be on `PATH` and `python3-dev` installed):
 sudo apt-get install -y python3-venv python3-dev
 python3 -m venv --system-site-packages ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 PATH=/usr/local/cuda/bin:$PATH pip install -c constraints/jetson-jp6.2-py310.txt ./protocol "./agent[jetson]"
 ```
 

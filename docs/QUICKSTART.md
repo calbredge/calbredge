@@ -96,6 +96,7 @@ JetPack 6.2; pycuda compiles from source, which takes a few minutes and needs `n
 sudo apt-get install -y python3-venv python3-dev
 python3 -m venv --system-site-packages ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 PATH=/usr/local/cuda/bin:$PATH pip install -c constraints/jetson-jp6.2-py310.txt ./protocol "./agent[jetson]"
 ```
 
@@ -210,6 +211,7 @@ against about 400 MB of downloads and 1.6 GB on disk with the CPU build.
 ```bash
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # older pip can't install from a clone
 pip install -c constraints/rknn-convert-x86_64-py312.txt --extra-index-url https://download.pytorch.org/whl/cpu rknn-toolkit2 ./protocol "./agent[rknn-convert]"
 ```
 
@@ -238,6 +240,7 @@ With the board running, install in the clone:
 sudo apt-get install -y python3-venv
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 pip install -c constraints/rk3588-jammy-py310.txt ./protocol "./agent[rk3588]"
 ```
 
@@ -329,6 +332,7 @@ Install in the clone; x86 has no constraints file:
 ```bash
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # older pip can't install from a clone
 pip install ./protocol "./agent[onnxruntime]"
 ```
 

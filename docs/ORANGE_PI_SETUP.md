@@ -99,6 +99,7 @@ constraints file, which holds the versions tested with Python 3.12.3:
 ```bash
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # older pip can't install from a clone
 pip install -c constraints/rknn-convert-x86_64-py312.txt --extra-index-url https://download.pytorch.org/whl/cpu rknn-toolkit2 ./protocol "./agent[rknn-convert]"
 ```
 
@@ -126,6 +127,7 @@ In a clone of the repository, with the venv active. The `rk3588` extra installs
 `rknn-toolkit-lite2`, and the constraints file holds the versions validated on this board:
 
 ```bash
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 pip install -c constraints/rk3588-jammy-py310.txt ./protocol "./agent[rk3588]"
 ```
 

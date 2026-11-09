@@ -41,6 +41,7 @@ With the power mode chosen ([QUICKSTART step 1](docs/QUICKSTART.md#1-set-the-pow
 ```bash
 python3 -m venv --system-site-packages ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 PATH=/usr/local/cuda/bin:$PATH pip install -c constraints/jetson-jp6.2-py310.txt ./protocol "./agent[jetson]"
 sudo jetson_clocks          # lock the processor speeds until the next reboot
 calbredge doctor
@@ -55,6 +56,7 @@ On an x86 host:
 ```bash
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # older pip can't install from a clone
 pip install -c constraints/rknn-convert-x86_64-py312.txt --extra-index-url https://download.pytorch.org/whl/cpu rknn-toolkit2 ./protocol "./agent[rknn-convert]"
 calbredge convert --framework rknn --model <your model>.onnx --precision fp16 --output <your model>.onnx.rknn.fp16.default
 # copy the .onnx, the .rknn and its build record to the board, side by side
@@ -65,6 +67,7 @@ On the board:
 ```bash
 python3 -m venv ~/calbredge-venv
 source ~/calbredge-venv/bin/activate
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 pip install -c constraints/rk3588-jammy-py310.txt ./protocol "./agent[rk3588]"
 sudo scripts/performance_mode.sh          # lock the processor speeds until the next reboot
 calbredge doctor

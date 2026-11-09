@@ -127,6 +127,7 @@ Run this after every pip operation that might pull in a newer NumPy.
 
 **Fix: always reinstall in this order on Jetson:**
 ```bash
+pip install --upgrade pip      # Ubuntu 22.04's stock pip can't install from a clone
 pip install -e ../protocol/
 pip install -e .
 pip uninstall onnxruntime -y
